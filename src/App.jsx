@@ -20,6 +20,12 @@ const HomePage = React.lazy(() => import('./pages/Home'))
 const Chat = React.lazy(() => import('./components/memories/ChatSimulator'))
 function App() {
   const { darkMode, setDarkMode, notificationsEnabled, setNotificationsEnabled } = useStore()
+
+  
+  useEffect(() => {
+    // دايمًا ثبّت العنوان مهما حصل
+    document.title = "Memories Site ❤️"
+  }, [])
   
   useEffect(() => {
     // استعادة الإعدادات من localStorage

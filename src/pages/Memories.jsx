@@ -8,9 +8,7 @@ import { NavLink } from 'react-router-dom'
 import {useStore} from '../store/useStore'
 import ScrollButtons from '../components/scroltop-bot'
 export default function MemoriesPage() {
-  useEffect(() => {
-    document.title = "ذكرياتنا الجميلة | رحلة الحب"
-  }, [])
+
   
   const { 
     darkMode, 
