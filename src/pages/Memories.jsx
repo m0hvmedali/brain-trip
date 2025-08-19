@@ -77,7 +77,7 @@ export default function MemoriesPage() {
             transition={{ delay: 0.2 }}
           >
             <h2 className="p-4 text-xl font-bold bg-rose-100 rounded-lg rtext-rose-700 dark:bg-gray-900 dark:text-pink-300">
-              معرض الصور
+              Gallery
             </h2>
             <PhotoGallery />
           </motion.div>

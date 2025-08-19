@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, MessageSquare, Map, Star, Music, Gem, BookHeart, GalleryThumbnails, Menu, Home } from 'lucide-react';
+import { Heart, MessageSquare, Map, Star, Music, Gem, BookHeart, GalleryThumbnails, Menu, Home, MapPin, ImagePlay, Computer, TimerIcon } from 'lucide-react';
 
 const navItems = [
-  { id: 'home', path: '/', icon: <Home size={24} />, label: 'الرئيسية' },
-  { id: 'memories', path: '/memories', icon: <GalleryThumbnails size={24} />, label: 'ذكريات' },
-  { id: 'game', path: '/game', icon: <Star size={24} />, label: 'لعبة' },
-  { id: 'map', path: '/map', icon: <Map size={24} />, label: 'خريطة' },
-  { id: 'jana', path: '/jana', icon: <Gem size={24} />, label: 'جانا' },
-  { id: 'room', path: '/room', icon: <Heart size={24} />, label: 'الغرفة' },
-  { id: 'gratitude', path: '/gratitude', icon: <BookHeart size={24} />, label: 'امتنان' },
-  { id: 'dreams', path: '/dreams', icon: <MessageSquare size={24} />, label: 'أحلام' },
-  { id: 'playlist', path: '/playlist', icon: <Music size={24} />, label: 'موسيقى' },
+  { id: 'home', path: '/', icon: <Home size={24} />, label: 'Home' },
+  { id: 'memories', path: '/memories', icon: <GalleryThumbnails size={24} />, label: 'Memories' },
+  { id: 'game', path: '/game', icon: <ImagePlay size={24} />, label: 'Game for u' },
+  { id: 'map', path: '/map', icon: <MapPin size={24} />, label: 'Pin maps' },
+  // { id: 'jana', path: '/jana', icon: <Gem size={24} />, label: 'جانا' },
+  { id: 'room', path: '/room', icon: <Computer size={24} />, label: 'Room' },
+  { id: 'gratitude', path: '/gratitude', icon: <BookHeart size={24} />, label: 'Gratitude' },
+  { id: 'dreams', path: '/dreams', icon: <TimerIcon size={24} />, label: 'Dreams ' },
+  // { id: 'playlist', path: '/playlist', icon: <Music size={24} />, label: 'Music' },
 ];
 
 export default function Navigation() {

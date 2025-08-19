@@ -3,13 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 const timelinePeriods = [
-  { id: 'beginning', label: 'البدايات', year: '11' },
-  { id: 'first-date', label: 'أول موعد', year: '1' },
-  { id: 'engagement', label: 'الخطوبة', year: '3' },
-  { id: 'current', label: 'الحاضر', year: '4' },
-  { id: 'future', label: 'المستقبل', year: '5' },
-  { id: '1', label: 'المستقبل', year: '6' },
-  { id: '2', label: 'المستقبل', year: '8' },
+  { id: 'beginning', label: null, year: 'Nov' },
+  { id: 'first-date', label:null , year: 'Jan' },
+  { id: 'engagement', label: null, year: 'Mar' },
+  { id: 'current', label: null, year: 'Apr' },
+  { id: 'future', label: null, year: 'May' },
+  { id: '1', label: null, year: 'Jun' },
+  { id: '2', label: null, year: 'Aug' },
 ]
 
 export default function TimelineSlider() {

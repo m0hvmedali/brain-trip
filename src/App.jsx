@@ -15,7 +15,7 @@ const JanaPage = React.lazy(() => import('./pages/Jana'))
 const MemoryRoomPage = React.lazy(() => import('./pages/MemoryRoom'))
 const GratitudePage = React.lazy(() => import('./pages/Gratitude'))
 const DreamsPage = React.lazy(() => import('./pages/Dreams'))
-const PlaylistPage = React.lazy(() => import('./pages/Playlist'))
+// const PlaylistPage = React.lazy(() => import('./pages/Playlist'))
 const HomePage = React.lazy(() => import('./pages/Home'))
 const Chat = React.lazy(() => import('./components/memories/ChatSimulator'))
 function App() {
@@ -46,15 +46,15 @@ function App() {
       
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          {/* <Route path="/" element={<HomePage />} /> */}
           <Route path="/memories" element={<MemoriesPage />} />
           <Route path="/game" element={<GamePage />} />
           <Route path="/map" element={<MapPage />} />
-          <Route path="/jana" element={<JanaPage />} />
+          <Route path="/" element={<JanaPage />} />
           <Route path="/room" element={<MemoryRoomPage />} />
           <Route path="/gratitude" element={<GratitudePage />} />
           <Route path="/dreams" element={<DreamsPage />} />
-          <Route path="/playlist" element={<PlaylistPage />} />
+          {/* <Route path="/playlist" element={<PlaylistPage />} /> */}
           <Route path="/settings" element={<SettingsPanel />} />
           <Route path="/chat" element={<Chat />} />
         </Routes>

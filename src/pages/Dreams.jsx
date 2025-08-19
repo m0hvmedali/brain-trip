@@ -8,42 +8,42 @@ export default function DreamsPage() {
   const scale = useTransform(scrollYProgress, [0, 1], [0.5, 1.5])
   
   useEffect(() => {
-    document.title = "أحلامنا ومستقبلنا | رحلة الحب"
+    document.title = "Our future | our dreams"
   }, [])
   
   const dreams = [
     {
-      year: "2023",
-      title: "رحلة إلى جبال الألب",
-      description: "سنقضي أسبوعًا بين الجبال الخلابة والبحيرات الزرقاء",
+      year: "",
+      title: "travel out",
+      description: "نسافر ونطلع برا البلد دي ",
       icon: <Plane className="text-indigo-600 dark:text-indigo-400" />,
       color: "indigo"
     },
     {
-      year: "2024",
-      title: "شراء منزلنا الأول",
-      description: "منزل صغير بحديقة حيث يمكننا زراعة الورود",
+      year: "",
+      title: "Home ",
+      description: "تعملي بيت دافي تحسي في بالامان مع راجل تطمني معاه",
       icon: <Home className="text-rose-600 dark:text-rose-400" />,
       color: "rose"
     },
     {
-      year: "2025",
-      title: "الزواج",
-      description: "يومنا الخاص حيث نبدأ رحلتنا معًا رسميًا",
+      year: "",
+      title: "Marry",
+      description: "اه بتقولي دايما مش عايزه تجوزي بس هتجوزي حد بيحبك وبيخاف عليكي زي مانت عايزه لانك تستاهلي ",
       icon: <Stars className="text-amber-600 dark:text-amber-400" />,
       color: "amber"
     },
     {
-      year: "2026",
-      title: "إكمال الدراسات العليا",
-      description: "دعم بعضنا البعض في تحقيق الأهداف الأكاديمية",
+      year: "",
+      title: "Study ",
+      description: "تخلصي دراسه وتخلصي من التوتر اللي هيقتلك قريب ",
       icon: <GraduationCap className="text-emerald-600 dark:text-emerald-400" />,
       color: "emerald"
     },
     {
-      year: "2027",
-      title: "رحلة حول العالم",
-      description: "زيارة 10 دول لنكتشف العالم معًا",
+      year: "",
+      title: "Work", 
+      description: "وبعد ما تخلصي دراسه تبقي احلى دكنوره بيطريه",
       icon: <Star className="text-indigo-600 dark:text-indigo-400" />,
       color: "indigo"
     }
@@ -65,7 +65,7 @@ export default function DreamsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          أحلامنا ومستقبلنا معًا
+          Our future | our dreams
         </motion.h1>
         
         <Timeline>
@@ -93,10 +93,10 @@ export default function DreamsPage() {
               repeat: Infinity
             }}
           >
-            ...يُـتـبـع
+            ...To be continued
           </motion.h2>
           <p className="text-xl text-indigo-800 dark:text-indigo-200">
-            لأن مستقبلنا معًا سيحمل المزيد من الأحلام الجميلة
+          Because I am sure that your dreams will grow
           </p>
         </div>
       </div>

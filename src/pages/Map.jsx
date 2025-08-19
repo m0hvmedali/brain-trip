@@ -9,27 +9,43 @@ import { ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react'
 const locations = [
   {
     id: 1,
-    name: "محطة الرمل — محمد عبدالمجيد الزيات (مارييت سابقاً)",
-    position: [31.2015, 29.901],
-    description: "٤ ش د/ محمد عبدالمجيد الزيات (مارييت سابقاً) محطة الرمل - قسم العطارين شارع فؤاد, طريق الحرية، محافظة الإسكندرية 21521",
-    date: "مكان مهم",
-    images: ['/WhatsApp Image 2025-08-17 at 1.38.47 AM.jpeg']
+    name: "Burger King ",
+    position: [31.21152,29.9368448,14],
+    description: "5 mohammed fawzi moaaz",
+    date: "First food date ",
+    images: ['/WhatsApp Image 2025-08-17 at 1.39.12 AM.jpeg']
   },
   {
     id: 2,
-    name: "مكان ثاني (مثال)",
-    position: [31.2050, 29.9150],
-    description: "وصف موجز للمكان الثاني",
-    date: "10 يوليو 2021",
-    images: ['/WhatsApp Image 2025-08-17 at 1.38.55 AM.jpeg']
+    name: "Soly's space ",
+    position: [31.1976815,29.9074913,17],
+    description: " El Rsam stetion ",
+    date: "First date ",
+    images: ['/map/9d6b715b-e2bc-42f5-93a0-2c563ca536c3.jfif']
   },
   {
     id: 3,
-    name: "مكان ثالث (مثال)",
-    position: [31.1980, 29.9050],
-    description: "مكان ثالث في الإسكندرية - مثال",
-    date: "22 أبريل 2020",
-    images: ['/WhatsApp Image 2025-08-17 at 1.38.56 AM.jpeg']
+    name: "Jana's home",
+    position: [31.1656961,29.8699577,19],
+    descri: "El werdyan sharq",
+    date: null,
+    images: ['/map/91d33996-13e3-430c-a114-ec83af5a6ad1.jfif']
+  },
+  {
+    id: 4,
+    name: "Mohamed's home",
+    position: [31.1645813,29.8699128,20.41],
+    descri: "El werdyan sharq",
+    date: null,
+    images: ['/map/9dae46b9-ab42-47b2-8e04-fcce3870718a.jfif']
+  },
+  {
+    id: 5,
+    name: "تراث ",
+    position: [31.2013592,29.9035885,17],
+    descri: "El Raml stetion ",
+    date: "Study date",
+    images: ['/map/f78fe8f2-2e0e-4df0-b0e5-6ca716d80042.jfif']
   }
 ]
 
