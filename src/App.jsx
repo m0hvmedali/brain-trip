@@ -23,23 +23,29 @@ function App() {
   
   useEffect(() => {
     // استعادة الإعدادات من localStorage
-    const savedDarkMode = localStorage.getItem('darkMode') === 'true'
-    const savedNotifications = localStorage.getItem('notificationsEnabled') === 'true'
-    
-    setDarkMode(savedDarkMode)
-    setNotificationsEnabled(savedNotifications)
-    
+    const savedDarkMode = localStorage.getItem('darkMode')
+    const savedNotifications = localStorage.getItem('notificationsEnabled')
+  
+    // لو مفيش قيمة محفوظة للـ darkMode → نخليها true (الوضع الداكن الافتراضي)
+    const darkModeEnabled = savedDarkMode ? savedDarkMode === 'true' : true
+    const notificationsEnabledValue = savedNotifications ? savedNotifications === 'true' : false
+  
+    setDarkMode(darkModeEnabled)
+    setNotificationsEnabled(notificationsEnabledValue)
+  
     // تطبيق الوضع الداكن
-    if (savedDarkMode) {
+    if (darkModeEnabled) {
       document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
     }
-    
+  
     // تسجيل خدمة الإشعارات
-    if (savedNotifications) {
+    if (notificationsEnabledValue) {
       registerNotificationService()
     }
   }, [setDarkMode, setNotificationsEnabled])
-
+  
   return (
     <div className="overflow-x-hidden relative min-h-screen">
       {/* <FloatingHearts count={20} /> */}
