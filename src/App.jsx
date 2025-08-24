@@ -5,7 +5,6 @@ import BrainScene from './components/BrainScene';
 import ChatInterface from './components/ChatInterface';
 import MemoryViewer from './components/MemoryViewer';
 import './App.css';
-
 function App() {
   const [currentPage, setCurrentPage] = useState('welcome'); // 'welcome', 'brain', 'chat', 'memory'
   const [selectedRegion, setSelectedRegion] = useState(null);
