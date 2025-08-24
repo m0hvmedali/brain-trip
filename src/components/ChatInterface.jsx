@@ -49,15 +49,15 @@ const ChatInterface = ({ onBackClick }) => {
     };
   }, []);
 
-  // إجراءات سريعة ثابتة
+  // **الإجراءات السريعة الآن تدعم رد ثابت** (response)
   const quickActions = [
-    { label: <><User className="inline ml-1 w-4 h-4" /> تكلم عن شخصيتي</>, query: 'تكلم عن شخصيتي' },
-    { label: <><Heart className="inline ml-1 w-4 h-4" /> ما هي علاقتي برحمه؟</>, query: 'ما هي علاقتي برحمه محمد؟' },
-    { label: <><Users className="inline ml-1 w-4 h-4" /> كلمني عن انجي</>, query: 'تكلم عن انجي' },
-    { label: <><Target className="inline ml-1 w-4 h-4" /> ما هي أهدافي؟</>, query: 'ما هي أهدافي؟' },
+    { label: <><User className="inline ml-1 w-4 h-4" /> تكلم عن شخصيتي</>, query: 'تكلم عن شخصيتي', response: 'أنت شخص حساس ومبدع، تهتم بالتفاصيل وتحب مساعدة الآخرين. تملك شغفاً بالتعلم والتطوير الذاتي.' },
+    { label: <><Heart className="inline ml-1 w-4 h-4" /> ما هي علاقتي برحمه؟</>, query: 'ما هي علاقتي برحمه محمد؟', response: 'علاقتك برحمه تبدو حنونة ومستقرة؛ تشعر بالراحة معها وتبادلها اهتمامك ودعمك.' },
+    { label: <><Users className="inline ml-1 w-4 h-4" /> كلمني عن انجي</>, query: 'تكلم عن انجي', response: 'انجي شخصية ودودة ومحبة، تميل للتفكير العملي وتحب أن تكون جزءاً من المشاريع الجماعية.' },
+    { label: <><Target className="inline ml-1 w-4 h-4" /> ما هي أهدافي؟</>, query: 'ما هي أهدافي؟', response: 'أهدافك تشمل التطور المهني، بناء علاقات أعمق، وتحقيق توازن صحي بين العمل والحياة.' },
   ];
 
-  // دالة إرسال الرسائل (للمستخدم والإجراءات السريعة)
+  // دالة إرسال الرسائل (للمستخدم اليدوي)
   const handleSendMessage = async (query) => {
     const messageToSend = query || inputValue;
     if (!messageToSend.trim()) return;
@@ -70,26 +70,56 @@ const ChatInterface = ({ onBackClick }) => {
     };
 
     setMessages(prev => [...prev, userMessage]);
-    // always clear input after sending (works for quickActions and manual sends)
+    // always clear input after sending (works for manual sends)
     setInputValue('');
     inputRef.current?.focus();
 
     setIsTyping(true);
 
-    // محاكاة استدعاء العقل والتفكير لإعطاء شعور واقعي
+    // محاكاة استدعاء العقل والتفكير (يتم فقط للرسائل اليدوية)
     setTimeout(() => {
       const botResponseContent = getSmartResponse(messageToSend);
-      
+
       const botMessage = {
         id: Date.now() + 1,
         type: 'bot',
         content: botResponseContent,
         timestamp: new Date()
       };
-      
+
       setMessages(prev => [...prev, botMessage]);
       setIsTyping(false);
-    }, 1200 + Math.random() * 800); 
+    }, 1200 + Math.random() * 800);
+  };
+
+  // دالة خاصة بالإجراءات السريعة: ترسل رسالة المستخدم ثم تضيف رد ثابت (بدون استدعاء العقل)
+  const handleQuickAction = (action) => {
+    if (!action || !action.query) return;
+
+    const userMessage = {
+      id: Date.now(),
+      type: 'user',
+      content: action.query,
+      timestamp: new Date()
+    };
+
+    // نُضيف رسالة المستخدم أولا
+    setMessages(prev => [...prev, userMessage]);
+    setInputValue('');
+    inputRef.current?.focus();
+
+    // نُحاكي لحظة تفكير قصيرة ثم نضيف الرد الثابت
+    setIsTyping(true);
+    setTimeout(() => {
+      const botMessage = {
+        id: Date.now() + 1,
+        type: 'bot',
+        content: action.response ?? 'هذا رد ثابت على الإجراء.',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, botMessage]);
+      setIsTyping(false);
+    }, 300); // وقت قصير ليشعر المستخدم بتفاعل
   };
 
   const handleKeyPress = (e) => {
@@ -323,7 +353,7 @@ const ChatInterface = ({ onBackClick }) => {
               <button
                 key={index}
                 type="button"
-                onClick={() => handleSendMessage(action.query)}
+                onClick={() => handleQuickAction(action)}
                 className="bg-gray-800/70 border border-gray-700 text-cyan-200 px-3 py-1.5 rounded-full text-xs hover:bg-gray-700 hover:border-cyan-600 transition-all"
               >
                 {action.label}

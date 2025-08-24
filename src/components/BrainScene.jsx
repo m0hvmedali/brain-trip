@@ -4,7 +4,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Sphere, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import personalData from '../data/personalData.json';
-import { MessageCircleQuestionMarkIcon } from "lucide-react";
+import { MessageCircleMore, MessageCircleQuestionMarkIcon } from "lucide-react";
 // Neural Network Component
 const NeuralNetwork = ({ radius = 6, count = 100, color = '#00ffff', label, onNeuronClick }) => {
   const groupRef = useRef();
@@ -149,16 +149,15 @@ const BrainScene = ({ onChatClick }) => {
   <div className="fixed bottom-6 left-1/2 z-40 -translate-x-1/2">
     <button
       onClick={onChatClick}
-      className="p-4 text-white bg-cyan-600 rounded-full border border-cyan-300 shadow-lg animate-pulse hover:bg-cyan-500 glow-button"
+      className="p-4 text-white bg-gradient-to-r from-cyan-600 to-blue-600 rounded-full shadow-lg interactive-element hover:from-cyan-500 hover:to-blue-500 pulse-glow"
     >
-      <MessageCircleQuestionMarkIcon className="w-6 h-6" />
+      <MessageCircleMore className="w-6 h-6" />
+   
     </button>
   </div>
 )}
 
-   
     </div>
   );
 };
-
 export default BrainScene;
