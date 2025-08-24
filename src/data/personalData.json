@@ -1,0 +1,7 @@
+{
+  "networks": [
+    { "label": "الذكريات", "count": 80, "color": "#00ffff" },
+    { "label": "الأحلام", "count": 60, "color": "#ff00ff" },
+    { "label": "الأهداف", "count": 100, "color": "#ffff00" }
+  ]
+}
