@@ -103,7 +103,7 @@ const BrainScene = ({ onChatClick }) => {
     <div className="w-screen h-screen bg-black">
       {/* Header */}
       <div className="fixed top-6 left-6 z-40">
-        <h1 className="text-2xl font-bold text-cyan-400 neon-text">رحلة في عقلي</h1>
+        <h1 className="text-2xl font-bold text-cyan-400 neon-text">on my mind </h1>
       </div>
 
       {/* 3D Canvas */}
@@ -132,14 +132,14 @@ const BrainScene = ({ onChatClick }) => {
       {/* Data Popup */}
       {activeNeuron && (
         <div className="fixed right-6 top-20 z-50 p-4 w-64 text-white rounded-xl shadow-lg bg-black/70">
-          <h2 className="mb-2 font-bold text-cyan-400">📌 بيانات العصبة</h2>
+          <h2 className="mb-2 font-bold text-cyan-400">x</h2>
           <p className="mb-1 text-sm text-gray-200">الشبكة: {activeNeuron.label}</p>
     
           <button
             onClick={() => setActiveNeuron(null)}
             className="px-3 py-1 mt-3 text-sm bg-cyan-600 rounded hover:bg-cyan-500"
           >
-            إغلاق
+            x
           </button>
         </div>
       )}

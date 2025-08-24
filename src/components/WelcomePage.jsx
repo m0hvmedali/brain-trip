@@ -6,8 +6,8 @@ const WelcomePage = ({ onComplete }) => {
   const [showSkip, setShowSkip] = useState(false);
   const [countdown, setCountdown] = useState(5);
 
-  const welcomeText = 'مرحباً بك في رحلة استكشاف ذكرياتي ومشاعري';
-  const subtitle = 'استعد لدخول عالم العقل والوعي';
+  const welcomeText = 'Here are things that the mind failed to remember, so I remembered them';
+  const subtitle = 'reedy!!!!!';
 
   useEffect(() => {
     // Typewriter effect for welcome text
@@ -38,9 +38,9 @@ const WelcomePage = ({ onComplete }) => {
   }, [onComplete, welcomeText]);
 
   return (
-    <div className="brain-container flex items-center justify-center">
+    <div className="flex justify-center items-center brain-container">
       {/* Background particles */}
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="overflow-hidden absolute inset-0">
         {[...Array(50)].map((_, i) => (
           <motion.div
             key={i}
@@ -63,15 +63,15 @@ const WelcomePage = ({ onComplete }) => {
       </div>
 
       {/* Main content */}
-      <div className="text-center z-10 max-w-4xl mx-auto px-8">
+      <div className="z-10 px-8 mx-auto max-w-4xl text-center">
         {/* Logo/Title */}
         <motion.h1
-          className="text-6xl md:text-8xl font-bold mb-8 neon-text text-cyan-400"
+          className="mb-8 text-6xl font-bold text-cyan-400 md:text-8xl neon-text"
           initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1 }}
         >
-          رحلة في عقلي
+          Virtual mind
         </motion.h1>
 
         {/* Animated welcome text */}
@@ -88,7 +88,7 @@ const WelcomePage = ({ onComplete }) => {
         {/* Subtitle */}
         {showSkip && (
           <motion.p
-            className="text-lg md:text-xl text-cyan-300 mb-12"
+            className="mb-12 text-lg text-cyan-300 md:text-xl"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
@@ -105,7 +105,7 @@ const WelcomePage = ({ onComplete }) => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
           >
-            <div className="flex justify-center items-center space-x-2 mb-4">
+            <div className="flex justify-center items-center mb-4 space-x-2">
               {[...Array(5)].map((_, i) => (
                 <motion.div
                   key={i}
@@ -140,11 +140,11 @@ const WelcomePage = ({ onComplete }) => {
             
             <motion.button
               onClick={onComplete}
-              className="interactive-element bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white px-8 py-3 rounded-full text-lg font-semibold transition-all duration-300 pulse-glow"
+              className="px-8 py-3 text-lg font-semibold text-white bg-gradient-to-r from-cyan-600 to-blue-600 rounded-full transition-all duration-300 interactive-element hover:from-cyan-500 hover:to-blue-500 pulse-glow"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              ابدأ الرحلة الآن ←
+              gooooo
             </motion.button>
           </motion.div>
         )}
@@ -153,7 +153,7 @@ const WelcomePage = ({ onComplete }) => {
       {/* Decorative elements */}
       <div className="absolute bottom-10 left-10">
         <motion.div
-          className="w-20 h-20 border-2 border-cyan-400 rounded-full neural-glow"
+          className="w-20 h-20 rounded-full border-2 border-cyan-400 neural-glow"
           animate={{ rotate: 360 }}
           transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
         />
@@ -161,7 +161,7 @@ const WelcomePage = ({ onComplete }) => {
       
       <div className="absolute top-10 right-10">
         <motion.div
-          className="w-16 h-16 border-2 border-purple-400 rounded-full neural-glow"
+          className="w-16 h-16 rounded-full border-2 border-purple-400 neural-glow"
           animate={{ rotate: -360 }}
           transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
         />
