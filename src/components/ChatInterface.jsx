@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { User, Users, Heart, Target, BrainCircuit, ArrowLeft, Send, ArrowDown, ArrowUp, Brain, BookOpen, Shield, Sparkles } from 'lucide-react';
 
 // استيراد "العقل" الجديد من ملف الخدمات
-import { getSmartResponse } from "../services1/memoryService.jsx";
+import { getSmartResponse, SmartResponseComponent } from "../services1/memoryService.jsx";
 
 const ChatInterface = ({ onBackClick }) => {
   const [messages, setMessages] = useState([
@@ -62,12 +62,16 @@ const ChatInterface = ({ onBackClick }) => {
     setIsTyping(true);
 
     setTimeout(() => {
+      // استخدام الدالة المحدثة التي ترجع نص بسيط
       const botResponseContent = getSmartResponse(messageToSend);
       const botMessage = {
         id: Date.now() + 1,
         type: 'bot',
         content: botResponseContent,
-        timestamp: new Date()
+        timestamp: new Date(),
+        // إضافة معرف خاص للرسائل التي تحتاج مكون تفاعلي
+        isSmartResponse: true,
+        query: messageToSend
       };
 
       setMessages(prev => [...prev, botMessage]);
@@ -195,7 +199,18 @@ const ChatInterface = ({ onBackClick }) => {
                     ? 'bg-blue-600 text-white rounded-br-lg' 
                     : 'bg-gray-800/90 text-gray-200 border border-gray-700 rounded-bl-lg'
                 }`}>
-                  <p className="leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                  {/* عرض المحتوى العادي أو المكون التفاعلي */}
+                  {message.isSmartResponse ? (
+                    <div className="space-y-4">
+                      <p className="leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                      <div className="pt-3 border-t border-gray-600">
+                        <p className="mb-2 text-xs text-gray-400">للحصول على تحليل تفاعلي مع إمكانية الإرسال إلى API:</p>
+                        <SmartResponseComponent query={message.query} />
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                  )}
                   <p className={`text-xs opacity-60 mt-2 ${message.type === 'user' ? 'text-right' : 'text-left'}`}>
                     {message.timestamp.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}
                   </p>
@@ -267,3 +282,4 @@ const ChatInterface = ({ onBackClick }) => {
 };
 
 export default ChatInterface;
+

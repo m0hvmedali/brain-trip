@@ -1,5 +1,5 @@
 // src/services/memoryService.jsx
-import React, { useState } from "react";
+import React from "react";
 import {
   Shield,
   Calendar,
@@ -26,22 +26,10 @@ import {
 } from "lucide-react";
 import * as allData from "../assets/data/index.js";
 
-/**
- * يحلل الاستعلام ويُنشئ تقرير استخباراتي بصري متكامل.
- * الآن يدعم:
- * - إرسال رسالة المستخدم إلى API handler والحصول على رد
- * - عرض رد API قبل التقرير مع زر لعرض/إخفاء التقرير
- * - عرض الأشخاص بشكل بطاقات شخصية مع الصفات والعلاقات
- * - عرض المفاهيم والعواطف بشكل منظم مع تفاصيل علمية
- * - عرض المحادثات بشكل شبيه بواتساب مع تفاعلية كاملة
- * - تقسيم الرد الطويل إلى عدة "رسائل" (chunks)
- * - إمكانية تنزيل كل جزء كملف نصي
- */
-
 // دالة لإرسال الاستعلام إلى API handler
 const sendToAPIHandler = async (query) => {
   try {
-    const response = await fetch('/api/handler.js', {
+    const response = await fetch('/api/handler', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -61,25 +49,18 @@ const sendToAPIHandler = async (query) => {
   }
 };
 
-export const getSmartResponse = (query) => {
+/**
+ * مكون React لعرض التقرير الذكي مع إمكانية إرسال الطلب إلى API
+ */
+export const SmartResponseComponent = ({ query }) => {
+  const [apiResponse, setApiResponse] = React.useState(null);
+  const [showReport, setShowReport] = React.useState(false);
+  const [loadingAPI, setLoadingAPI] = React.useState(false);
+
   const lowerQuery = (query || '').toLowerCase().trim();
-  const responseMessages = [];
-  const [apiResponse, setApiResponse] = useState(null);
-  const [showReport, setShowReport] = useState(false);
-  const [loadingAPI, setLoadingAPI] = useState(false);
 
   // تعابير مساعدة
-  const CHUNK_SIZE = 900; // طول القطعة عند تقسيم النص
-
-  const splitIntoChunks = (text, size = CHUNK_SIZE) => {
-    if (!text) return [''];
-    text = typeof text === 'string' ? text : JSON.stringify(text, null, 2);
-    const chunks = [];
-    for (let i = 0; i < text.length; i += size) {
-      chunks.push(text.slice(i, i + size));
-    }
-    return chunks;
-  };
+  const CHUNK_SIZE = 900;
 
   const downloadText = (text, fileName = 'snippet.txt') => {
     try {
@@ -97,22 +78,15 @@ export const getSmartResponse = (query) => {
     }
   };
 
-  // دالة لتحميل التقرير كاملاً
-  const downloadFullReport = () => {
-    // جمع كل النصوص من التقرير
-    let fullReport = `تقرير البحث عن: "${query}"\n\n`;
-    
-    // إضافة محتوى كل قسم
-    const reportElements = document.querySelectorAll('[data-report-content]');
-    reportElements.forEach((el, index) => {
-      fullReport += `\n--- قسم ${index + 1} ---\n`;
-      fullReport += el.textContent + '\n';
-    });
-    
-    downloadText(fullReport, `تقرير-كامل-عن-${query}.txt`);
+  // دالة لإرسال الطلب إلى API
+  const handleAPIRequest = async () => {
+    setLoadingAPI(true);
+    const response = await sendToAPIHandler(query);
+    setApiResponse(response);
+    setLoadingAPI(false);
   };
 
-  // دالة التمرير الى أعلى (سهم العودة)
+  // دالة التمرير الى أعلى
   const scrollToTop = () => {
     const el = document.getElementById('smart-report-top');
     if (el && typeof el.scrollIntoView === 'function') {
@@ -122,7 +96,7 @@ export const getSmartResponse = (query) => {
     }
   };
 
-  // دالة التمرير الى الاسفل (سهم النزول)
+  // دالة التمرير الى الاسفل
   const scrollToBottom = () => {
     const el = document.getElementById('smart-report-bottom');
     if (el && typeof el.scrollIntoView === 'function') {
@@ -132,107 +106,17 @@ export const getSmartResponse = (query) => {
     }
   };
 
-  // دالة لإرسال الطلب إلى API
-  const handleAPIRequest = async () => {
-    setLoadingAPI(true);
-    const response = await sendToAPIHandler(query);
-    setApiResponse(response);
-    setLoadingAPI(false);
-  };
-
   if (!lowerQuery) {
-    responseMessages.push(
-      <div key="error" className="p-4 text-red-300 rounded-xl border border-red-700 shadow-lg bg-red-900/40">
+    return (
+      <div className="p-4 text-red-300 rounded-xl border border-red-700 shadow-lg bg-red-900/40">
         <Shield className="inline mr-1 w-4 h-4 text-red-400" /> يرجى تحديد مصطلح للتحقيق فيه.
       </div>
     );
-    
-    return responseMessages;
   }
-
-  // إضافة مرساة في بداية التقرير لتمكين العودة السلسة
-  // نضع id على العنصر التعريفي الأول لتسهيل scrollIntoView
-
-  // رسالة توضيحية أولية مع زر إرسال إلى API
-  responseMessages.push(
-    <div id="smart-report-top" key="intro" className="p-4 text-blue-200 rounded-xl border border-blue-700 shadow-lg bg-blue-900/30">
-      <div className="flex gap-2 items-center mb-2">
-        <Search className="w-5 h-5 text-blue-400" />
-        <span className="font-bold">جاري البحث عن:</span>
-        <span className="font-bold text-blue-300"> "{query}"</span>
-      </div>
-      <p className="mb-3 text-sm">ستظهر النتائج منظمة في بطاقات حسب نوع البيانات. الأشخاص، المشاعر، والمحادثات كل لها عرض خاص.</p>
-      
-      {/* زر إرسال إلى API */}
-      <div className="flex gap-3 items-center mb-3">
-        <button 
-          onClick={handleAPIRequest}
-          disabled={loadingAPI}
-          className="flex gap-2 items-center px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50"
-        >
-          <Send className="w-4 h-4" />
-          {loadingAPI ? 'جاري الإرسال...' : 'إرسال إلى API'}
-        </button>
-        
-        {apiResponse && (
-          <button 
-            onClick={() => setShowReport(!showReport)}
-            className="flex gap-2 items-center px-4 py-2 text-white bg-purple-600 rounded-lg hover:bg-purple-700"
-          >
-            {showReport ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            {showReport ? 'إخفاء التقرير' : 'عرض التقرير'}
-          </button>
-        )}
-      </div>
-
-      <div className="flex justify-center mt-3">
-        <button onClick={scrollToBottom} title="الذهاب للأسفل" aria-label="الذهاب للأسفل" className="flex gap-2 items-center px-3 py-1 mx-auto text-white bg-blue-600 rounded-full w-fit hover:bg-blue-700">
-          <ChevronDown className="w-5 h-5" />
-          <span className="text-sm">إلى الأسفل</span>
-        </button>
-      </div>
-    </div>
-  );
-
-  // عرض رد API إذا كان متوفراً
-  if (apiResponse) {
-    responseMessages.push(
-      <div key="api-response" className="p-4 mb-4 text-green-200 rounded-xl border border-green-700 shadow-lg bg-green-900/30">
-        <div className="flex gap-2 items-center mb-3">
-          <Brain className="w-5 h-5 text-green-400" />
-          <span className="font-bold text-green-300">رد من API:</span>
-        </div>
-        <div className="p-3 rounded-lg border bg-green-800/30 border-green-700/50">
-          <p className="text-sm leading-relaxed whitespace-pre-wrap">{apiResponse}</p>
-        </div>
-        <div className="flex gap-2 mt-3">
-          <button
-            onClick={() => navigator.clipboard.writeText(apiResponse)}
-            className="flex gap-1 items-center px-3 py-1 text-xs text-white bg-green-600 rounded"
-          >
-            <Copy className="w-3 h-3" />
-            نسخ الرد
-          </button>
-          <button
-            onClick={() => downloadText(apiResponse, `api-response-${query}.txt`)}
-            className="flex gap-1 items-center px-3 py-1 text-xs text-white bg-blue-600 rounded"
-          >
-            <Download className="w-3 h-3" />
-            تحميل
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // إذا كان المستخدم لا يريد عرض التقرير، نتوقف هنا
-  if (apiResponse && !showReport) {
-    return responseMessages;
-  }
-
-  let intelligenceDossiers = [];
 
   // البحث المتقدم مع الترجيح
+  let intelligenceDossiers = [];
+  
   Object.entries(allData).forEach(([fileName, dataset]) => {
     if (!Array.isArray(dataset)) return;
 
@@ -280,39 +164,6 @@ export const getSmartResponse = (query) => {
 
   intelligenceDossiers.sort((a, b) => b.relevanceScore - a.relevanceScore);
 
-  if (intelligenceDossiers.length === 0) {
-    responseMessages.push(
-      <div key="no-results" className="p-4 text-yellow-200 rounded-xl border border-yellow-700 shadow-lg bg-yellow-900/30">
-        <Shield className="inline mr-1 w-4 h-4 text-yellow-400" />
-        لم يتم العثور على أي نتائج للمصطلح <span className="font-bold text-yellow-400">"{query}"</span>.
-      </div>
-    );
-    return responseMessages;
-  }
-
-  // تجميع حسب الملف
-  const sections = {};
-  intelligenceDossiers.forEach((dossier) => {
-    if (!sections[dossier.sourceFile]) sections[dossier.sourceFile] = [];
-    sections[dossier.sourceFile].push(dossier);
-  });
-
-  // إحصاءات النتائج
-  responseMessages.push(
-    <div key="stats" className="p-4 rounded-xl border border-gray-700 bg-gray-800/70">
-      <div className="grid grid-cols-2 gap-4 text-sm">
-        <div className="flex gap-2 items-center">
-          <Zap className="w-4 h-4 text-green-400" />
-          <span>عدد النتائج: <span className="text-green-300">{intelligenceDossiers.length}</span></span>
-        </div>
-        <div className="flex gap-2 items-center">
-          <Filter className="w-4 h-4 text-blue-400" />
-          <span>عدد الأقسام: <span className="text-blue-300">{Object.keys(sections).length}</span></span>
-        </div>
-      </div>
-    </div>
-  );
-
   // دالة لتظليل النص المطابق
   const highlightText = (text, highlight) => {
     if (text === null || text === undefined) return '';
@@ -329,9 +180,9 @@ export const getSmartResponse = (query) => {
     }
   };
 
-  // مكون زر النسخ مع تغيير اللون
+  // مكون زر النسخ
   const CopyButton = ({ text, fileName }) => {
-    const [copied, setCopied] = useState(false);
+    const [copied, setCopied] = React.useState(false);
 
     const handleCopy = () => {
       navigator.clipboard.writeText(text).then(() => {
@@ -353,359 +204,229 @@ export const getSmartResponse = (query) => {
     );
   };
 
-  // مكون لعرض الأشخاص بشكل بطاقة شخصية
-  const PersonCard = ({ person }) => {
-    return (
-      <div className="p-5 bg-gradient-to-br rounded-2xl border border-purple-700 shadow-lg from-purple-900/40 to-blue-900/40" data-report-content>
-        <div className="flex gap-3 items-center mb-4">
-          <div className="p-2 bg-purple-700 rounded-full">
-            <User className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h3 className="text-xl font-bold text-white">{person.name}</h3>
-            <p className="text-purple-300">{person.relationship_to_user}</p>
-          </div>
+  return (
+    <div className="space-y-4">
+      {/* رسالة توضيحية أولية مع زر إرسال إلى API */}
+      <div id="smart-report-top" className="p-4 text-blue-200 rounded-xl border border-blue-700 shadow-lg bg-blue-900/30">
+        <div className="flex gap-2 items-center mb-2">
+          <Search className="w-5 h-5 text-blue-400" />
+          <span className="font-bold">جاري البحث عن:</span>
+          <span className="font-bold text-blue-300"> "{query}"</span>
         </div>
-
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          {person.age && (
-            <div className="flex gap-2 items-center">
-              <Calendar className="w-4 h-4 text-blue-400" />
-              <span className="text-sm text-gray-300">العمر: {person.age}</span>
-            </div>
+        <p className="mb-3 text-sm">ستظهر النتائج منظمة في بطاقات حسب نوع البيانات. الأشخاص، المشاعر، والمحادثات كل لها عرض خاص.</p>
+        
+        {/* زر إرسال إلى API */}
+        <div className="flex gap-3 items-center mb-3">
+          <button 
+            onClick={handleAPIRequest}
+            disabled={loadingAPI}
+            className="flex gap-2 items-center px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50"
+          >
+            <Send className="w-4 h-4" />
+            {loadingAPI ? 'جاري الإرسال...' : 'إرسال إلى API'}
+          </button>
+          
+          {apiResponse && (
+            <button 
+              onClick={() => setShowReport(!showReport)}
+              className="flex gap-2 items-center px-4 py-2 text-white bg-purple-600 rounded-lg hover:bg-purple-700"
+            >
+              {showReport ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              {showReport ? 'إخفاء التقرير' : 'عرض التقرير'}
+            </button>
           )}
         </div>
 
-        {person.traits && person.traits.length > 0 && (
-          <div className="mb-4">
-            <h4 className="mb-2 text-sm font-semibold text-purple-400">الصفات</h4>
-            <div className="flex flex-wrap gap-2">
-              {person.traits.map((trait, index) => (
-                <span key={index} className="px-3 py-1 text-xs text-purple-200 rounded-full bg-purple-700/50">
-                  {trait}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {person.background && (
-          <div className="mb-4">
-            <h4 className="mb-2 text-sm font-semibold text-purple-400">خلفية</h4>
-            <p className="text-sm leading-relaxed text-gray-300">{highlightText(person.background, lowerQuery)}</p>
-          </div>
-        )}
-
-        <div className="flex gap-2 mt-4">
-          <CopyButton text={JSON.stringify(person, null, 2)} fileName={`person-${person.name}.json`} />
+        <div className="flex justify-center mt-3">
+          <button onClick={scrollToBottom} title="الذهاب للأسفل" className="flex gap-2 items-center px-3 py-1 mx-auto text-white bg-blue-600 rounded-full w-fit hover:bg-blue-700">
+            <ChevronDown className="w-5 h-5" />
+            <span className="text-sm">إلى الأسفل</span>
+          </button>
         </div>
       </div>
-    );
-  };
 
-  // مكون لعرض المشاعر والمفاهيم
-  const EmotionCard = ({ emotion }) => {
-    return (
-      <div className="p-5 bg-gradient-to-br rounded-2xl border border-pink-700 shadow-lg from-pink-900/40 to-red-900/40" data-report-content>
-        <div className="flex gap-3 items-center mb-4">
-          <div className="p-2 bg-pink-700 rounded-full">
-            <Heart className="w-6 h-6 text-white" />
+      {/* عرض رد API إذا كان متوفراً */}
+      {apiResponse && (
+        <div className="p-4 mb-4 text-green-200 rounded-xl border border-green-700 shadow-lg bg-green-900/30">
+          <div className="flex gap-2 items-center mb-3">
+            <Brain className="w-5 h-5 text-green-400" />
+            <span className="font-bold text-green-300">رد من API:</span>
           </div>
-          <div>
-            <h3 className="text-xl font-bold text-white">{emotion.name} ({emotion.english_name})</h3>
-            <p className="text-pink-300">{emotion.family} - {emotion.type}</p>
+          <div className="p-3 rounded-lg border bg-green-800/30 border-green-700/50">
+            <p className="text-sm leading-relaxed whitespace-pre-wrap">{apiResponse}</p>
           </div>
-        </div>
-
-        {emotion.definition && (
-          <div className="mb-4">
-            <h4 className="mb-2 text-sm font-semibold text-pink-400">التعريف</h4>
-            <p className="text-sm leading-relaxed text-gray-300">{highlightText(emotion.definition, lowerQuery)}</p>
-          </div>
-        )}
-
-        {emotion.branches && emotion.branches.length > 0 && (
-          <div className="mb-4">
-            <h4 className="mb-2 text-sm font-semibold text-pink-400">الفروع</h4>
-            <div className="flex flex-wrap gap-2">
-              {emotion.branches.map((branch, index) => (
-                <span key={index} className="px-3 py-1 text-xs text-pink-200 rounded-full bg-pink-700/50">
-                  {branch}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {emotion.triggers && emotion.triggers.length > 0 && (
-          <div className="mb-4">
-            <h4 className="mb-2 text-sm font-semibold text-pink-400">المحفزات</h4>
-            <ul className="space-y-1 text-sm list-disc list-inside text-gray-300">
-              {emotion.triggers.map((trigger, index) => (
-                <li key={index}>{highlightText(trigger, lowerQuery)}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {emotion.expressions && emotion.expressions.length > 0 && (
-          <div className="mb-4">
-            <h4 className="mb-2 text-sm font-semibold text-pink-400">التعبيرات</h4>
-            <div className="space-y-3">
-              {emotion.expressions.map((expression, index) => (
-                <div key={index} className="p-3 rounded-lg border bg-pink-900/30 border-pink-800/50">
-                  <p className="text-sm italic text-gray-300">"{highlightText(expression, lowerQuery)}"</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div className="flex gap-2 mt-4">
-          <CopyButton text={JSON.stringify(emotion, null, 2)} fileName={`emotion-${emotion.name}.json`} />
-        </div>
-      </div>
-    );
-  };
-
-  // مكون لعرض المحادثات بشكل مشابه لواتساب
-  const ConversationView = ({ messages, searchTerm, title }) => {
-    const [expanded, setExpanded] = useState(true);
-    const [showAll, setShowAll] = useState(false);
-    const [windowMessages, setWindowMessages] = useState(null);
-
-    // البحث عن مؤشرات المطابقة
-    const matchedIndices = [];
-    messages.forEach((msg, index) => {
-      const msgText = JSON.stringify(msg).toLowerCase();
-      if (msgText.includes(searchTerm.toLowerCase())) {
-        matchedIndices.push(index);
-      }
-    });
-
-    // تحديد العرض الافتراضي: 5 قبل و5 بعد لكل مطابقة
-    let displayIndices = new Set();
-    matchedIndices.forEach(idx => {
-      const start = Math.max(0, idx - 5);
-      const end = Math.min(messages.length - 1, idx + 5);
-      for (let i = start; i <= end; i++) displayIndices.add(i);
-    });
-
-    let displayMessages = Array.from(displayIndices).sort((a,b)=>a-b).map(i => messages[i]);
-
-    if (displayMessages.length === 0 && messages.length > 0) {
-      displayMessages = messages.slice(0, 10);
-    }
-
-    if (showAll) displayMessages = messages;
-    if (windowMessages) displayMessages = windowMessages;
-
-    const showContextAround = (idx) => {
-      const start = Math.max(0, idx - 5);
-      const end = Math.min(messages.length, idx + 6);
-      setWindowMessages(messages.slice(start, end));
-    };
-
-    const clearWindow = () => setWindowMessages(null);
-
-    // دالة لتحويل الوقت إلى صيغة أكثر جاذبية
-    const formatTime = (timeStr) => {
-      if (!timeStr) return '';
-      return timeStr.replace(/\s/g, '').replace(/AM|PM/gi, '');
-    };
-
-    // دالة لتحديد إذا كان المرسل هو المستخدم الحالي
-    const isCurrentUser = (sender) => {
-      const senderLower = (sender || '').toLowerCase();
-      return senderLower.includes('mohamed') || senderLower.includes('mohamed aly');
-    };
-
-    return (
-      <div className="p-4 mt-4 bg-gray-800 rounded-xl border border-gray-700" data-report-content>
-        <div className="flex justify-between items-center mb-3">
-          <h3 className="flex gap-2 items-center font-semibold text-green-400">
-            <MessageCircle className="w-4 h-4" /> {title}
-          </h3>
-          <div className="flex gap-2 items-center">
-            <button onClick={() => setExpanded(!expanded)} className="text-gray-400 transition-colors hover:text-gray-200">
-              {expanded ? <ChevronUp /> : <ChevronDown />}
+          <div className="flex gap-2 mt-3">
+            <button
+              onClick={() => navigator.clipboard.writeText(apiResponse)}
+              className="flex gap-1 items-center px-3 py-1 text-xs text-white bg-green-600 rounded"
+            >
+              <Copy className="w-3 h-3" />
+              نسخ الرد
             </button>
-            <button onClick={() => { setShowAll(!showAll); clearWindow(); }} className="px-3 py-1 text-xs bg-blue-700 rounded">
-              {showAll ? 'إخفاء كامل' : `عرض كامل (${messages.length})`}
+            <button
+              onClick={() => downloadText(apiResponse, `api-response-${query}.txt`)}
+              className="flex gap-1 items-center px-3 py-1 text-xs text-white bg-blue-600 rounded"
+            >
+              <Download className="w-3 h-3" />
+              تحميل
             </button>
           </div>
         </div>
+      )}
 
-        {expanded && (
-          <div className="space-y-1">
-            {displayMessages.map((msg, index) => {
-              const globalIndex = messages.indexOf(msg);
-              const isMatch = JSON.stringify(msg).toLowerCase().includes(searchTerm.toLowerCase());
-              const fromMe = isCurrentUser(msg.sender);
+      {/* إذا كان المستخدم لا يريد عرض التقرير، نتوقف هنا */}
+      {apiResponse && !showReport && (
+        <div className="p-4 text-center text-gray-400">
+          <p className="text-sm">اضغط على "عرض التقرير" لرؤية التحليل التفصيلي</p>
+        </div>
+      )}
 
-              // استخراج النص الفعلي من الرسالة
-              const messageText = msg.text || msg.message || '';
-
-              return (
-                <div key={index} className={`flex ${fromMe ? 'justify-end' : 'justify-start'} mb-2`}>
-                  <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                    fromMe 
-                      ? 'text-white bg-blue-600' 
-                      : 'text-gray-200 bg-gray-700'
-                  } ${isMatch ? 'ring-2 ring-yellow-400' : ''}`}>
-                    
-                    {!fromMe && (
-                      <div className="mb-1 text-xs text-gray-400">
-                        {msg.sender || 'مجهول'}
-                      </div>
-                    )}
-                    
-                    <div className="text-sm">
-                      {highlightText(messageText, searchTerm)}
-                    </div>
-                    
-                    <div className="flex justify-between items-center mt-1">
-                      <div className="text-xs opacity-70">
-                        {formatTime(msg.time || msg.timestamp)}
-                      </div>
-                      
-                      {isMatch && (
-                        <button 
-                          onClick={() => showContextAround(globalIndex)}
-                          className="px-2 py-1 text-xs bg-yellow-600 rounded"
-                        >
-                          سياق
-                        </button>
-                      )}
-                    </div>
+      {/* عرض التقرير إذا لم يكن هناك رد API أو إذا اختار المستخدم عرضه */}
+      {(!apiResponse || showReport) && (
+        <>
+          {intelligenceDossiers.length === 0 ? (
+            <div className="p-4 text-yellow-200 rounded-xl border border-yellow-700 shadow-lg bg-yellow-900/30">
+              <Shield className="inline mr-1 w-4 h-4 text-yellow-400" />
+              لم يتم العثور على أي نتائج للمصطلح <span className="font-bold text-yellow-400">"{query}"</span>.
+            </div>
+          ) : (
+            <>
+              {/* إحصاءات النتائج */}
+              <div className="p-4 rounded-xl border border-gray-700 bg-gray-800/70">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="flex gap-2 items-center">
+                    <Zap className="w-4 h-4 text-green-400" />
+                    <span>عدد النتائج: <span className="text-green-300">{intelligenceDossiers.length}</span></span>
                   </div>
-                </div>
-              );
-            })}
-            
-            {windowMessages && (
-              <div className="p-3 mt-4 rounded-lg border border-yellow-700 bg-yellow-900/30">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm text-yellow-300">عرض السياق</span>
-                  <button onClick={clearWindow} className="px-2 py-1 text-xs bg-red-600 rounded">
-                    إغلاق
-                  </button>
+                  <div className="flex gap-2 items-center">
+                    <Filter className="w-4 h-4 text-blue-400" />
+                    <span>عدد الأقسام: <span className="text-blue-300">{new Set(intelligenceDossiers.map(d => d.sourceFile)).size}</span></span>
+                  </div>
                 </div>
               </div>
-            )}
+
+              {/* عرض النتائج */}
+              <div className="space-y-4">
+                {intelligenceDossiers.slice(0, 10).map((dossier, index) => (
+                  <div key={index} className="p-4 bg-gray-800 rounded-xl border border-gray-700">
+                    <div className="flex gap-2 items-center mb-3">
+                      <FileText className="w-4 h-4 text-gray-400" />
+                      <h3 className="font-semibold text-white">{dossier.subject}</h3>
+                      <span className="px-2 py-1 text-xs text-gray-300 bg-gray-700 rounded">
+                        درجة الصلة: {dossier.relevanceScore}
+                      </span>
+                    </div>
+                    
+                    <div className="space-y-2 text-sm text-gray-300">
+                      {Object.entries(dossier.content).slice(0, 3).map(([key, value]) => {
+                        if (typeof value === 'string' && value.toLowerCase().includes(lowerQuery)) {
+                          return (
+                            <div key={key} className="p-2 rounded bg-gray-700/50">
+                              <span className="font-semibold text-gray-400">{key}:</span>
+                              <div className="mt-1">{highlightText(value, lowerQuery)}</div>
+                            </div>
+                          );
+                        }
+                        return null;
+                      })}
+                    </div>
+                    
+                    <div className="flex gap-2 mt-4">
+                      <CopyButton text={JSON.stringify(dossier.content, null, 2)} fileName={`${dossier.subject}.json`} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* نهاية التقرير */}
+          <div id="smart-report-bottom" className="p-4 mt-6 text-center text-gray-400 rounded-xl border border-gray-700 bg-gray-800/50">
+            <div className="flex gap-4 justify-center mb-3">
+              <button onClick={scrollToTop} title="العودة للأعلى" className="flex gap-2 items-center px-3 py-1 text-white bg-gray-600 rounded-full hover:bg-gray-700">
+                <ChevronUp className="w-5 h-5" />
+                <span className="text-sm">إلى الأعلى</span>
+              </button>
+            </div>
+            <p className="text-sm">انتهى التقرير الاستخباراتي عن "{query}"</p>
           </div>
-        )}
-
-        <div className="flex gap-2 mt-4">
-          <CopyButton text={JSON.stringify(messages, null, 2)} fileName={`conversation-${title}.json`} />
-        </div>
-      </div>
-    );
-  };
-
-  // عرض النتائج حسب النوع
-  Object.entries(sections).forEach(([sourceFile, dossiers]) => {
-    const sectionTitle = sourceFile.replace('.json', '');
-    
-    responseMessages.push(
-      <div key={sourceFile} className="mt-6">
-        <h2 className="flex gap-2 items-center mb-4 text-lg font-bold text-white">
-          <Folder className="w-5 h-5 text-blue-400" />
-          {sectionTitle}
-          <span className="px-2 py-1 text-xs text-blue-200 rounded-full bg-blue-700/50">
-            {dossiers.length}
-          </span>
-        </h2>
-        
-        <div className="space-y-4">
-          {dossiers.map((dossier, index) => {
-            const content = dossier.content;
-            
-            // تحديد نوع المحتوى وعرضه بالشكل المناسب
-            if (content.name && content.relationship_to_user) {
-              // هذا شخص
-              return <PersonCard key={index} person={content} />;
-            } else if (content.name && content.english_name && content.family) {
-              // هذا مشعر أو مفهوم
-              return <EmotionCard key={index} emotion={content} />;
-            } else if (Array.isArray(content) && content.length > 0 && content[0].sender) {
-              // هذه محادثة
-              return (
-                <ConversationView 
-                  key={index} 
-                  messages={content} 
-                  searchTerm={lowerQuery}
-                  title={`محادثة من ${sectionTitle}`}
-                />
-              );
-            } else {
-              // محتوى عام
-              return (
-                <div key={index} className="p-4 bg-gray-800 rounded-xl border border-gray-700" data-report-content>
-                  <div className="flex gap-2 items-center mb-3">
-                    <FileText className="w-4 h-4 text-gray-400" />
-                    <h3 className="font-semibold text-white">{dossier.subject}</h3>
-                    <span className="px-2 py-1 text-xs text-gray-300 bg-gray-700 rounded">
-                      درجة الصلة: {dossier.relevanceScore}
-                    </span>
-                  </div>
-                  
-                  <div className="space-y-2 text-sm text-gray-300">
-                    {Object.entries(content).map(([key, value]) => {
-                      if (typeof value === 'string' && value.toLowerCase().includes(lowerQuery)) {
-                        return (
-                          <div key={key} className="p-2 rounded bg-gray-700/50">
-                            <span className="font-semibold text-gray-400">{key}:</span>
-                            <div className="mt-1">{highlightText(value, lowerQuery)}</div>
-                          </div>
-                        );
-                      } else if (Array.isArray(value) && value.some(item => 
-                        typeof item === 'string' && item.toLowerCase().includes(lowerQuery)
-                      )) {
-                        return (
-                          <div key={key} className="p-2 rounded bg-gray-700/50">
-                            <span className="font-semibold text-gray-400">{key}:</span>
-                            <ul className="mt-1 space-y-1 list-disc list-inside">
-                              {value.map((item, idx) => (
-                                <li key={idx}>{highlightText(String(item), lowerQuery)}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        );
-                      }
-                      return null;
-                    })}
-                  </div>
-                  
-                  <div className="flex gap-2 mt-4">
-                    <CopyButton text={JSON.stringify(content, null, 2)} fileName={`${dossier.subject}.json`} />
-                  </div>
-                </div>
-              );
-            }
-          })}
-        </div>
-      </div>
-    );
-  });
-
-  // إضافة مرساة في نهاية التقرير
-  responseMessages.push(
-    <div id="smart-report-bottom" key="footer" className="p-4 mt-6 text-center text-gray-400 rounded-xl border border-gray-700 bg-gray-800/50">
-      <div className="flex gap-4 justify-center mb-3">
-        <button onClick={scrollToTop} title="العودة للأعلى" aria-label="العودة للأعلى" className="flex gap-2 items-center px-3 py-1 text-white bg-gray-600 rounded-full hover:bg-gray-700">
-          <ChevronUp className="w-5 h-5" />
-          <span className="text-sm">إلى الأعلى</span>
-        </button>
-        <button onClick={downloadFullReport} title="تحميل التقرير كاملاً" aria-label="تحميل التقرير كاملاً" className="flex gap-2 items-center px-3 py-1 text-white bg-green-600 rounded-full hover:bg-green-700">
-          <Download className="w-5 h-5" />
-          <span className="text-sm">تحميل التقرير</span>
-        </button>
-      </div>
-      <p className="text-sm">انتهى التقرير الاستخباراتي عن "{query}"</p>
+        </>
+      )}
     </div>
   );
+};
 
-  return responseMessages;
+/**
+ * دالة مساعدة للحصول على نص بسيط من التقرير (للاستخدام في ChatInterface)
+ */
+export const getSmartResponse = (query) => {
+  const lowerQuery = (query || '').toLowerCase().trim();
+  
+  if (!lowerQuery) {
+    return 'يرجى تحديد مصطلح للتحقيق فيه.';
+  }
+
+  // البحث السريع للحصول على نتيجة نصية
+  let results = [];
+  
+  Object.entries(allData).forEach(([fileName, dataset]) => {
+    if (!Array.isArray(dataset)) return;
+
+    dataset.forEach((entry) => {
+      let relevanceScore = 0;
+      const subjectName = entry.name || entry.title || entry.sender || 'مجهول';
+
+      // البحث في الحقول المهمة
+      const importantFields = { name: 10, title: 8, content: 7, message: 7, text: 6 };
+
+      Object.entries(importantFields).forEach(([field, weight]) => {
+        if (entry[field] && typeof entry[field] === 'string') {
+          const fieldValue = entry[field].toLowerCase();
+          if (fieldValue.includes(lowerQuery)) relevanceScore += weight;
+        }
+      });
+
+      if (relevanceScore > 0) {
+        results.push({
+          subject: subjectName,
+          content: entry,
+          relevanceScore: relevanceScore
+        });
+      }
+    });
+  });
+
+  results.sort((a, b) => b.relevanceScore - a.relevanceScore);
+
+  if (results.length === 0) {
+    return `لم يتم العثور على أي نتائج للمصطلح "${query}".`;
+  }
+
+  // إرجاع ملخص نصي للنتائج الأولى
+  const topResults = results.slice(0, 3);
+  let summary = `تم العثور على ${results.length} نتيجة للبحث عن "${query}":\n\n`;
+  
+  topResults.forEach((result, index) => {
+    summary += `${index + 1}. ${result.subject}\n`;
+    
+    // إضافة بعض التفاصيل من المحتوى
+    const content = result.content;
+    if (content.name && content.relationship_to_user) {
+      summary += `   - العلاقة: ${content.relationship_to_user}\n`;
+    }
+    if (content.definition) {
+      summary += `   - التعريف: ${content.definition.substring(0, 100)}...\n`;
+    }
+    if (content.background) {
+      summary += `   - الخلفية: ${content.background.substring(0, 100)}...\n`;
+    }
+    summary += '\n';
+  });
+
+  if (results.length > 3) {
+    summary += `... و ${results.length - 3} نتائج أخرى.`;
+  }
+
+  return summary;
 };
 

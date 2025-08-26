@@ -13,7 +13,7 @@ export default async function handler(req, res) {
       name: "qualified-stingray-2025-08-26",
       projectName: "Default",
       organizationId: "80af136a-180a-4b31-a9bb-d35160b2dd64",
-      apiKey: process.env.LLAMA_CLOUD_API_KEY, // مفتاحك من Vercel env
+      apiKey: "llx-PdTufgkIr4R0dmyrQDdU7eENZvjOJlQLE7qCQckYyyO5Cb28", // مفتاحك من Vercel env
     });
 
     const retriever = index.asRetriever({ similarityTopK: 5 });
