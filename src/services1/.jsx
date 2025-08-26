@@ -19,54 +19,22 @@ import {
   Sparkles,
   Copy,
   Check,
-  Download,
-  Send,
-  Eye,
-  EyeOff
+  Download
 } from "lucide-react";
 import * as allData from "../assets/data/index.js";
 
 /**
  * يحلل الاستعلام ويُنشئ تقرير استخباراتي بصري متكامل.
  * الآن يدعم:
- * - إرسال رسالة المستخدم إلى API handler والحصول على رد
- * - عرض رد API قبل التقرير مع زر لعرض/إخفاء التقرير
  * - عرض الأشخاص بشكل بطاقات شخصية مع الصفات والعلاقات
  * - عرض المفاهيم والعواطف بشكل منظم مع تفاصيل علمية
  * - عرض المحادثات بشكل شبيه بواتساب مع تفاعلية كاملة
  * - تقسيم الرد الطويل إلى عدة "رسائل" (chunks)
  * - إمكانية تنزيل كل جزء كملف نصي
  */
-
-// دالة لإرسال الاستعلام إلى API handler
-const sendToAPIHandler = async (query) => {
-  try {
-    const response = await fetch('/api/handler.js', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ query: query })
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.result || 'لم يتم الحصول على رد من API';
-  } catch (error) {
-    console.error('خطأ في إرسال الطلب إلى API:', error);
-    return `خطأ في الاتصال بـ API: ${error.message}`;
-  }
-};
-
 export const getSmartResponse = (query) => {
   const lowerQuery = (query || '').toLowerCase().trim();
   const responseMessages = [];
-  const [apiResponse, setApiResponse] = useState(null);
-  const [showReport, setShowReport] = useState(false);
-  const [loadingAPI, setLoadingAPI] = useState(false);
 
   // تعابير مساعدة
   const CHUNK_SIZE = 900; // طول القطعة عند تقسيم النص
@@ -132,14 +100,6 @@ export const getSmartResponse = (query) => {
     }
   };
 
-  // دالة لإرسال الطلب إلى API
-  const handleAPIRequest = async () => {
-    setLoadingAPI(true);
-    const response = await sendToAPIHandler(query);
-    setApiResponse(response);
-    setLoadingAPI(false);
-  };
-
   if (!lowerQuery) {
     responseMessages.push(
       <div key="error" className="p-4 text-red-300 rounded-xl border border-red-700 shadow-lg bg-red-900/40">
@@ -153,7 +113,7 @@ export const getSmartResponse = (query) => {
   // إضافة مرساة في بداية التقرير لتمكين العودة السلسة
   // نضع id على العنصر التعريفي الأول لتسهيل scrollIntoView
 
-  // رسالة توضيحية أولية مع زر إرسال إلى API
+  // رسالة توضيحية أولية
   responseMessages.push(
     <div id="smart-report-top" key="intro" className="p-4 text-blue-200 rounded-xl border border-blue-700 shadow-lg bg-blue-900/30">
       <div className="flex gap-2 items-center mb-2">
@@ -161,30 +121,7 @@ export const getSmartResponse = (query) => {
         <span className="font-bold">جاري البحث عن:</span>
         <span className="font-bold text-blue-300"> "{query}"</span>
       </div>
-      <p className="mb-3 text-sm">ستظهر النتائج منظمة في بطاقات حسب نوع البيانات. الأشخاص، المشاعر، والمحادثات كل لها عرض خاص.</p>
-      
-      {/* زر إرسال إلى API */}
-      <div className="flex gap-3 items-center mb-3">
-        <button 
-          onClick={handleAPIRequest}
-          disabled={loadingAPI}
-          className="flex gap-2 items-center px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50"
-        >
-          <Send className="w-4 h-4" />
-          {loadingAPI ? 'جاري الإرسال...' : 'إرسال إلى API'}
-        </button>
-        
-        {apiResponse && (
-          <button 
-            onClick={() => setShowReport(!showReport)}
-            className="flex gap-2 items-center px-4 py-2 text-white bg-purple-600 rounded-lg hover:bg-purple-700"
-          >
-            {showReport ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            {showReport ? 'إخفاء التقرير' : 'عرض التقرير'}
-          </button>
-        )}
-      </div>
-
+      <p className="text-sm">ستظهر النتائج منظمة في بطاقات حسب نوع البيانات. الأشخاص، المشاعر، والمحادثات كل لها عرض خاص.</p>
       <div className="flex justify-center mt-3">
         <button onClick={scrollToBottom} title="الذهاب للأسفل" aria-label="الذهاب للأسفل" className="flex gap-2 items-center px-3 py-1 mx-auto text-white bg-blue-600 rounded-full w-fit hover:bg-blue-700">
           <ChevronDown className="w-5 h-5" />
@@ -193,42 +130,6 @@ export const getSmartResponse = (query) => {
       </div>
     </div>
   );
-
-  // عرض رد API إذا كان متوفراً
-  if (apiResponse) {
-    responseMessages.push(
-      <div key="api-response" className="p-4 mb-4 text-green-200 rounded-xl border border-green-700 shadow-lg bg-green-900/30">
-        <div className="flex gap-2 items-center mb-3">
-          <Brain className="w-5 h-5 text-green-400" />
-          <span className="font-bold text-green-300">رد من API:</span>
-        </div>
-        <div className="p-3 rounded-lg border bg-green-800/30 border-green-700/50">
-          <p className="text-sm leading-relaxed whitespace-pre-wrap">{apiResponse}</p>
-        </div>
-        <div className="flex gap-2 mt-3">
-          <button
-            onClick={() => navigator.clipboard.writeText(apiResponse)}
-            className="flex gap-1 items-center px-3 py-1 text-xs text-white bg-green-600 rounded"
-          >
-            <Copy className="w-3 h-3" />
-            نسخ الرد
-          </button>
-          <button
-            onClick={() => downloadText(apiResponse, `api-response-${query}.txt`)}
-            className="flex gap-1 items-center px-3 py-1 text-xs text-white bg-blue-600 rounded"
-          >
-            <Download className="w-3 h-3" />
-            تحميل
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // إذا كان المستخدم لا يريد عرض التقرير، نتوقف هنا
-  if (apiResponse && !showReport) {
-    return responseMessages;
-  }
 
   let intelligenceDossiers = [];
 
@@ -547,165 +448,237 @@ export const getSmartResponse = (query) => {
               const messageText = msg.text || msg.message || '';
 
               return (
-                <div key={index} className={`flex ${fromMe ? 'justify-end' : 'justify-start'} mb-2`}>
-                  <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                    fromMe 
-                      ? 'text-white bg-blue-600' 
-                      : 'text-gray-200 bg-gray-700'
-                  } ${isMatch ? 'ring-2 ring-yellow-400' : ''}`}>
-                    
+                <div key={index} className={`flex ${fromMe ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-xs w-fit p-3 rounded-xl ${fromMe ? 'bg-green-700 rounded-br-none' : 'bg-gray-700 rounded-bl-none'} ${isMatch ? 'ring-2 ring-yellow-500' : ''}`}>
                     {!fromMe && (
-                      <div className="mb-1 text-xs text-gray-400">
-                        {msg.sender || 'مجهول'}
+                      <div className="mb-1 text-xs font-medium text-gray-300">
+                        {msg.sender}
                       </div>
                     )}
                     
-                    <div className="text-sm">
+                    <div className="text-sm leading-relaxed text-white whitespace-pre-wrap">
                       {highlightText(messageText, searchTerm)}
                     </div>
                     
-                    <div className="flex justify-between items-center mt-1">
-                      <div className="text-xs opacity-70">
-                        {formatTime(msg.time || msg.timestamp)}
-                      </div>
-                      
+                    <div className="mt-1 text-xs text-left text-gray-300">
+                      {formatTime(msg.time)}
+                    </div>
+
+                    <div className="flex gap-2 items-center mt-2">
                       {isMatch && (
                         <button 
-                          onClick={() => showContextAround(globalIndex)}
-                          className="px-2 py-1 text-xs bg-yellow-600 rounded"
+                          onClick={() => showContextAround(globalIndex)} 
+                          className="px-2 py-1 text-xs text-white bg-blue-600 rounded"
                         >
-                          سياق
+                          عرض السياق
                         </button>
                       )}
+                      <CopyButton text={JSON.stringify(msg, null, 2)} fileName={`message-${globalIndex}.json`} />
                     </div>
                   </div>
                 </div>
               );
             })}
-            
+
+            {!showAll && !windowMessages && messages.length > displayMessages.length && (
+              <div className="mt-4 text-center">
+                <button onClick={() => setShowAll(true)} className="px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+                  عرض المحادثة كاملة ({messages.length} رسالة)
+                </button>
+              </div>
+            )}
+
             {windowMessages && (
-              <div className="p-3 mt-4 rounded-lg border border-yellow-700 bg-yellow-900/30">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm text-yellow-300">عرض السياق</span>
-                  <button onClick={clearWindow} className="px-2 py-1 text-xs bg-red-600 rounded">
-                    إغلاق
-                  </button>
-                </div>
+              <div className="mt-2 text-right">
+                <button onClick={clearWindow} className="px-3 py-1 text-sm bg-gray-700 rounded">
+                  عودة للنتائج
+                </button>
               </div>
             )}
           </div>
         )}
-
-        <div className="flex gap-2 mt-4">
-          <CopyButton text={JSON.stringify(messages, null, 2)} fileName={`conversation-${title}.json`} />
-        </div>
       </div>
     );
   };
 
-  // عرض النتائج حسب النوع
-  Object.entries(sections).forEach(([sourceFile, dossiers]) => {
-    const sectionTitle = sourceFile.replace('.json', '');
-    
+  // عرض كل قسم حسب نوع البيانات
+  Object.entries(sections).forEach(([sectionName, dossiers], idx) => {
+    const sectionTitle = sectionName.replace('.json', '');
+
     responseMessages.push(
-      <div key={sourceFile} className="mt-6">
-        <h2 className="flex gap-2 items-center mb-4 text-lg font-bold text-white">
-          <Folder className="w-5 h-5 text-blue-400" />
-          {sectionTitle}
-          <span className="px-2 py-1 text-xs text-blue-200 rounded-full bg-blue-700/50">
-            {dossiers.length}
-          </span>
+      <div key={sectionName} className="p-4 space-y-4 text-gray-100 bg-gray-900 rounded-2xl border border-gray-700">
+        <h2 className="flex gap-2 items-center text-lg font-bold text-green-400">
+          <Folder className="w-5 h-5" /> {sectionTitle}
         </h2>
-        
-        <div className="space-y-4">
-          {dossiers.map((dossier, index) => {
-            const content = dossier.content;
-            
-            // تحديد نوع المحتوى وعرضه بالشكل المناسب
-            if (content.name && content.relationship_to_user) {
-              // هذا شخص
-              return <PersonCard key={index} person={content} />;
-            } else if (content.name && content.english_name && content.family) {
-              // هذا مشعر أو مفهوم
-              return <EmotionCard key={index} emotion={content} />;
-            } else if (Array.isArray(content) && content.length > 0 && content[0].sender) {
-              // هذه محادثة
-              return (
-                <ConversationView 
-                  key={index} 
-                  messages={content} 
-                  searchTerm={lowerQuery}
-                  title={`محادثة من ${sectionTitle}`}
-                />
-              );
-            } else {
-              // محتوى عام
-              return (
-                <div key={index} className="p-4 bg-gray-800 rounded-xl border border-gray-700" data-report-content>
-                  <div className="flex gap-2 items-center mb-3">
-                    <FileText className="w-4 h-4 text-gray-400" />
-                    <h3 className="font-semibold text-white">{dossier.subject}</h3>
-                    <span className="px-2 py-1 text-xs text-gray-300 bg-gray-700 rounded">
-                      درجة الصلة: {dossier.relevanceScore}
-                    </span>
+
+        {dossiers.map((dossier, index) => {
+          // تحديد نوع البيانات وعرضها بشكل مناسب
+          const content = dossier.content;
+          
+          // إذا كانت بيانات شخص
+          if (content.relationship_to_user && content.traits) {
+            return (
+              <div key={index} className="p-4 bg-gray-800 rounded-xl border border-gray-700 transition-colors hover:border-purple-400">
+                <div className="flex gap-2 items-center mb-3 font-semibold text-purple-400">
+                  <User className="w-4 h-4" /> {index + 1}. شخص: {dossier.subject}
+                </div>
+                <PersonCard person={content} />
+                <div className="flex gap-2 items-center mt-3 text-xs text-gray-400">
+                  <Folder className="w-3 h-3 text-gray-400" /> المصدر: {dossier.sourceFile}
+                </div>
+              </div>
+            );
+          }
+          
+          // إذا كانت بيانات عاطفة/مفهوم
+          else if (content.english_name && content.family) {
+            return (
+              <div key={index} className="p-4 bg-gray-800 rounded-xl border border-gray-700 transition-colors hover:border-pink-400">
+                <div className="flex gap-2 items-center mb-3 font-semibold text-pink-400">
+                  <Heart className="w-4 h-4" /> {index + 1}. مفهوم: {dossier.subject}
+                </div>
+                <EmotionCard emotion={content} />
+                <div className="flex gap-2 items-center mt-3 text-xs text-gray-400">
+                  <Folder className="w-3 h-3 text-gray-400" /> المصدر: {dossier.sourceFile}
+                </div>
+              </div>
+            );
+          }
+          
+          // إذا كانت محادثة (مجموعة رسائل)
+          else if (Array.isArray(content) && content[0] && content[0].sender) {
+            return (
+              <div key={index} className="p-4 bg-gray-800 rounded-xl border border-gray-700 transition-colors hover:border-green-400">
+                <div className="flex gap-2 items-center mb-3 font-semibold text-green-400">
+                  <MessageCircle className="w-4 h-4" /> {index + 1}. محادثة: {dossier.subject}
+                </div>
+                <ConversationView messages={content} searchTerm={lowerQuery} title={`سجل المحادثة — ${dossier.subject}`} />
+                <div className="flex gap-2 items-center mt-3 text-xs text-gray-400">
+                  <Folder className="w-3 h-3 text-gray-400" /> المصدر: {dossier.sourceFile}
+                </div>
+              </div>
+            );
+          }
+          
+          // إذا كانت رسالة فردية
+          else if (content.sender && content.text) {
+            // هذه رسالة فردية، نعرضها بشكل منفرد
+            return (
+              <div key={index} className="p-4 bg-gray-800 rounded-xl border border-gray-700 transition-colors hover:border-green-400">
+                <div className="flex gap-2 items-center mb-3 font-semibold text-green-400">
+                  <MessageCircle className="w-4 h-4" /> {index + 1}. رسالة: {dossier.subject}
+                </div>
+                
+                <div className="p-3 rounded-lg border border-gray-700 bg-gray-900/60" data-report-content>
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="text-sm text-gray-200">رسالة من {content.sender}</div>
+                    <div className="text-xs text-gray-400">{content.date} {content.time}</div>
                   </div>
-                  
-                  <div className="space-y-2 text-sm text-gray-300">
-                    {Object.entries(content).map(([key, value]) => {
-                      if (typeof value === 'string' && value.toLowerCase().includes(lowerQuery)) {
-                        return (
-                          <div key={key} className="p-2 rounded bg-gray-700/50">
-                            <span className="font-semibold text-gray-400">{key}:</span>
-                            <div className="mt-1">{highlightText(value, lowerQuery)}</div>
-                          </div>
-                        );
-                      } else if (Array.isArray(value) && value.some(item => 
-                        typeof item === 'string' && item.toLowerCase().includes(lowerQuery)
-                      )) {
-                        return (
-                          <div key={key} className="p-2 rounded bg-gray-700/50">
-                            <span className="font-semibold text-gray-400">{key}:</span>
-                            <ul className="mt-1 space-y-1 list-disc list-inside">
-                              {value.map((item, idx) => (
-                                <li key={idx}>{highlightText(String(item), lowerQuery)}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        );
-                      }
-                      return null;
-                    })}
+
+                  <div className="text-sm text-gray-200 whitespace-pre-wrap">
+                    {highlightText(content.text, lowerQuery)}
                   </div>
-                  
-                  <div className="flex gap-2 mt-4">
-                    <CopyButton text={JSON.stringify(content, null, 2)} fileName={`${dossier.subject}.json`} />
+
+                  <div className="flex gap-2 mt-3">
+                    <CopyButton text={content.text} fileName={`message-${content.sender}.txt`} />
                   </div>
                 </div>
-              );
+
+                <div className="flex gap-2 items-center mt-3 text-xs text-gray-400">
+                  <Folder className="w-3 h-3 text-gray-400" /> المصدر: {dossier.sourceFile}
+                </div>
+              </div>
+            );
+          }
+          
+          // إذا كانت بيانات أخرى
+          else {
+            // بدلاً من عرض الكائن كاملاً، نعرض فقط الحقول النصية المهمة
+            const importantFields = ['text', 'message', 'content', 'name', 'title', 'description'];
+            let displayContent = '';
+
+            // البحث عن أول حقل نصي مهم
+            for (const field of importantFields) {
+              if (content[field] && typeof content[field] === 'string') {
+                displayContent = content[field];
+                break;
+              }
             }
-          })}
-        </div>
+
+            // إذا لم نجد حقل نصي مهم، نعرض الكائن كاملاً
+            if (!displayContent) {
+              displayContent = JSON.stringify(content, null, 2);
+            }
+
+            const chunks = splitIntoChunks(displayContent, CHUNK_SIZE);
+
+            return (
+              <div key={index} className="p-4 bg-gray-800 rounded-xl border border-gray-700 transition-colors hover:border-green-400">
+                <div className="flex gap-2 items-center mb-3 font-semibold text-green-400">
+                  <FileText className="w-4 h-4" /> {index + 1}. بيانات: {dossier.subject}
+                </div>
+
+                <div className="space-y-3">
+                  {chunks.map((chunk, ci) => (
+                    <div key={ci} className="p-3 rounded-lg border border-gray-700 bg-gray-900/60" data-report-content>
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="text-sm text-gray-200">ملف {ci + 1} من {chunks.length}</div>
+                        <div className="text-xs text-gray-400">المصدر: {dossier.sourceFile}</div>
+                      </div>
+
+                      <div className="text-sm text-gray-200 whitespace-pre-wrap">{highlightText(chunk, lowerQuery)}</div>
+
+                      <div className="flex gap-2 mt-3">
+                        <CopyButton text={chunk} fileName={`${sectionTitle.replace(/\s+/g,'_')}_part_${ci+1}.txt`} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex gap-2 items-center mt-3 text-xs text-gray-400">
+                  <Folder className="w-3 h-3 text-gray-400" /> المصدر: {dossier.sourceFile}
+                </div>
+              </div>
+            );
+          }
+        })}
       </div>
     );
   });
 
-  // إضافة مرساة في نهاية التقرير
+  // زر تحميل التقرير كاملاً
   responseMessages.push(
-    <div id="smart-report-bottom" key="footer" className="p-4 mt-6 text-center text-gray-400 rounded-xl border border-gray-700 bg-gray-800/50">
-      <div className="flex gap-4 justify-center mb-3">
-        <button onClick={scrollToTop} title="العودة للأعلى" aria-label="العودة للأعلى" className="flex gap-2 items-center px-3 py-1 text-white bg-gray-600 rounded-full hover:bg-gray-700">
-          <ChevronUp className="w-5 h-5" />
-          <span className="text-sm">إلى الأعلى</span>
-        </button>
-        <button onClick={downloadFullReport} title="تحميل التقرير كاملاً" aria-label="تحميل التقرير كاملاً" className="flex gap-2 items-center px-3 py-1 text-white bg-green-600 rounded-full hover:bg-green-700">
-          <Download className="w-5 h-5" />
-          <span className="text-sm">تحميل التقرير</span>
-        </button>
-      </div>
-      <p className="text-sm">انتهى التقرير الاستخباراتي عن "{query}"</p>
+    <div key="download-full" className="p-4 text-center rounded-xl border border-gray-700 bg-gray-800/50">
+      <button 
+        onClick={downloadFullReport} 
+        className="flex gap-2 items-center px-4 py-2 mx-auto text-white bg-green-600 rounded-lg transition-colors hover:bg-green-700"
+      >
+        <Download className="w-5 h-5" />
+        dowenload all
+      </button>
+    </div>
+  );
+
+  // زر السهم في نهاية التقرير للرجوع إلى البداية
+  responseMessages.push(
+    <div key="back-to-top" id="smart-report-bottom" className="p-4 text-center rounded-xl border border-gray-700 bg-gray-800/50">
+      <button
+        onClick={scrollToTop}
+        title="العودة للبداية"
+        aria-label="العودة للبداية"
+        className="flex gap-2 items-center px-4 py-2 mx-auto text-white bg-blue-600 rounded-full w-fit hover:bg-blue-700"
+      >
+        <ChevronUp className="w-5 h-5" />
+      </button>
+    </div>
+  );
+
+  // رسالة ختامية
+  responseMessages.push(
+    <div key="footer" className="p-4 text-center rounded-xl border border-gray-700 bg-gray-800/50">
+      <div className="flex gap-2 justify-center items-center text-xs text-gray-400">انتهت النتائج. يمكنك حفظ أو نسخ أي جزء من الرد للرجوع إليه لاحقاً.</div>
     </div>
   );
 
   return responseMessages;
 };
-
